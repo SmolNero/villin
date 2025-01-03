@@ -34,6 +34,8 @@ pub fn build(b: *std.Build) void {
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
 
+    // This creates a build step. It will be visible in the 'zig --help' menu
+    // and can be selected like this: 'zig build test'
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_unit_tests.step)
+    test_step.dependOn(&run_unit_tests.step);
 }
