@@ -4,12 +4,12 @@ pub fn build(b: *std.Build) void {
 
     // Standard target options allows the person running 'zig build' to choose
     // what target to build for. Here we do not override the defaults
-    
+
     const target = b.standardTargetOptions(.{});
 
     // Standard optimization options allow the person running 'zig build' to select
     // between Debug, ReleaseSafe, releaseFast, and ReleaseSmall
-    
+
     const optimize = b.standardOptimizeOptions(.{});
 
     const exe = b.addExecutable(.{
@@ -21,19 +21,19 @@ pub fn build(b: *std.Build) void {
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" steps
-    
+
     b.installArtifact(exe);
 
     // Creates a step for unit testing
-    
-    const unit_tests = b.addTest(.{ 
-    .root_source_file = .{ .path = "src/main.zig" }, 
-    .taget = target, 
-    .optimize = optimize,
 
+    const unit_tests = b.addTest(.{
+        .root_source_file = .{ .path = "src/main.zig" },
+        .taget = target,
+        .optimize = optimize,
     });
 
+    const run_unit_tests = b.addRunArtifact(unit_tests);
 
-
-
+    const test_step = b.step("test", "Run unit tests");
+    test_step.dependOn(&run_unit_tests.step)
 }
