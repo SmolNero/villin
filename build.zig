@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{
         .name = "villin",
-        .root_source_file = .{ .cwd_relative = "src/main/.zig" },
+        .root_source_file = .{ .cwd_relative = "src/main.zig" },
         .target = target,
         .optimize = optimize,
     });
@@ -27,7 +27,7 @@ pub fn build(b: *std.Build) void {
     // Creates a step for unit testing
 
     const unit_tests = b.addTest(.{
-        .root_source_file = .{ .cwd_relative = "src/main/.zig" },
+        .root_source_file = .{ .cwd_relative = "src/main.zig" },
         .target = target,
         .optimize = optimize,
     });
