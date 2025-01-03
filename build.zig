@@ -10,11 +10,11 @@ pub fn build(b: *std.Build) void {
     // Standard optimization options allow the person running 'zig build' to select
     // between Debug, ReleaseSafe, releaseFast, and ReleaseSmall
 
-    const optimize = b.standardOptimizeOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
         .name = "villin",
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .file = &.{ "src", "main.zig" } }, FIXME:
         .target = target,
         .optimize = optimize,
     });
@@ -27,7 +27,7 @@ pub fn build(b: *std.Build) void {
     // Creates a step for unit testing
 
     const unit_tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .file = &.{ "src", "main.zig" } }, FIXME:
         .taget = target,
         .optimize = optimize,
     });
