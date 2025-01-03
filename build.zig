@@ -3,4 +3,9 @@
 
 const optimize = b.standarOptimizationOption(.{});
 
-const exe = b.addExecutable(.{ .name = "villin" });
+const exe = b.addExecutable(.{ 
+    .name = "villin" }
+    . root_source_file = .{path = "src/main.zig"}
+    
+    
+    );
