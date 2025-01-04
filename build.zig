@@ -6,14 +6,14 @@ pub fn build(b: *std.Build) void {
 
     // Standard target options allows the person running 'zig build' to choose
     // what target to build for. Here we do not override the defaults
-
     const target = b.standardTargetOptions(.{});
 
     // Standard optimization options allow the person running 'zig build' to select
     // between Debug, ReleaseSafe, releaseFast, and ReleaseSmall
-
     const optimize = b.standardOptimizeOption(.{});
 
+    // Allows cross-compilation for diff insustrial
+    // Can target PLCs, embedded devices, or servers
     const exe = b.addExecutable(.{
         .name = "villin",
         .root_source_file = .{ .cwd_relative = "src/main.zig" },
