@@ -14,12 +14,13 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // Allows cross-compilation for diff insustrial
+    // b(std.Build pointer) -> creates new executable build artifact
     // Can target PLCs, embedded devices, or servers
     const exe = b.addExecutable(.{
         .name = "villin",
-        .root_source_file = .{ .cwd_relative = "src/main.zig" },
-        .target = target,
-        .optimize = optimize,
+        .root_source_file = .{ .cwd_relative = "src/main.zig" }, // .cwd_relative -> takes relative path
+        .target = target, // ensuring the executable is built for the selected achitects/OS/ABI
+        .optimize = optimize, // pass the optimization level determined earlier
     });
 
     // This declares intent for the executable to be installed into the
