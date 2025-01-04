@@ -30,6 +30,7 @@ pub fn build(b: *std.Build) void {
     // exe -> is the build artifact you previously created
 
     // creates a test build artifact, when built/run, (exe)cutes tge unit test src/main.zig
+    // *.addTest -> test build artifact
     const unit_tests = b.addTest(.{
         .root_source_file = .{ .cwd_relative = "src/main.zig" },
         .target = target,
