@@ -1,7 +1,7 @@
 const std = @import("std");
 
 // This is Villins entry point
-// the '!' indicatesthis function can return an error
+// the '!' indicates this function can return an error
 // void means it doesn'treturn value
 pub fn main() !void {
     std.debug.print("Villin: Starting up...\n", .{});
