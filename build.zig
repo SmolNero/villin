@@ -5,11 +5,12 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
 
     // Standard target options allows the person running 'zig build' to choose
-    // what target to build for. Here we do not override the defaults
+    // standardTargetOptions - helper method from std.build that initlializes and processes target architecture, OS, and ABI options based on command-line flags
     const target = b.standardTargetOptions(.{});
 
     // Standard optimization options allow the person running 'zig build' to select
-    // between Debug, ReleaseSafe, releaseFast, and ReleaseSmall
+    // standardOptimieOption stand lib helper that picks the optimize level
+    // opt levels - between Debug, ReleaseSafe, releaseFast, and ReleaseSmall
     const optimize = b.standardOptimizeOption(.{});
 
     // Allows cross-compilation for diff insustrial
