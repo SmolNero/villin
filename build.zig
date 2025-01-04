@@ -37,6 +37,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    //Convenience method that creates a step to build and run the given artifact -> (unit_tests)
     const run_unit_tests = b.addRunArtifact(unit_tests);
 
     // This creates a build step. It will be visible in the 'zig --help' menu
