@@ -23,13 +23,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize, // pass the optimization level determined earlier
     });
 
+    b.installArtifact(exe);
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" steps
+    // without this, the build system would not know where you want to install the binary
+    // exe -> is the build artifact you previously created
 
-    b.installArtifact(exe);
-
-    // Creates a step for unit testing
-
+    // creates a test build artifact, when built/run, (exe)cutes tge unit test src/main.zig
     const unit_tests = b.addTest(.{
         .root_source_file = .{ .cwd_relative = "src/main.zig" },
         .target = target,
