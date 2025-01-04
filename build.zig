@@ -1,5 +1,7 @@
 const std = @import("std");
 
+// Build function is the entry point to Zig builds system
+// It receives a pointer to the Build object which provides build functionality
 pub fn build(b: *std.Build) void {
 
     // Standard target options allows the person running 'zig build' to choose
