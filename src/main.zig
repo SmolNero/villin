@@ -17,16 +17,18 @@ pub fn main() !void {
 }
 
 // TEST BLOCK 1
+// test out goes to stderr
+// Prints a success message if we made it this far (meaning the expect did not fail)
 test "basic" {
     std.debug.print("\nRunning basic...\n", .{});
-    try std.testing.expect(true);
+    try std.testing.expect(true);  // checks if given conditions are true - if not -> test fails (returns error)
     std.debug.print("Basic test passed\n", .{});
 }
 
 // TEST BLOCK 2
 test "compression placeholder" {
     std.debug.print("\nTesting compression placeholder...\n", .{});
-    const result = true;
+    const result = true;       // Declares a compile-time constant, set to true
     try std.testing.expectEqual(true, result);
     std.debug.print("compression test passed!", .{});
 }
