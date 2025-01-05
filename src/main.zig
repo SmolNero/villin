@@ -7,12 +7,14 @@ pub fn main() !void {
     std.debug.print("Villin: Starting up...\n", .{});
 }
 
+// TEST BLOCK 1
 test "basic" {
     std.debug.print("\nRunning basic...\n", .{});
     try std.testing.expect(true);
     std.debug.print("Basic test passed\n", .{});
 }
 
+// TEST BLOCK 2
 test "compression placeholder" {
     std.debug.print("\nTesting compression placeholder...\n", .{});
     const result = true;
