@@ -1,5 +1,7 @@
 # VILLN
 
+![villin Logo](assets/logo.png)
+
 > We make industrial sensor data small through zero-cost pattern recognition. While others treat sensor data like any other file, we see the hidden rhythms of machines - the predictable heartbeats of industrial systems. Our compression engine, built with zero-cost abstractions, turns these patterns into dramatic storage savings, helping factories cut costs without losing vital information. Already processing terabytes daily across manufacturing floors, we're not just moving data - we're decoding the language of industry at bare-metal speeds.
 
 ## Bending Industrial Energies
