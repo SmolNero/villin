@@ -1,5 +1,11 @@
-//main.zig objectives
-
+// main.zig objectives
+//  ---------------- //
+//    - Entry point for all funtionality 
+//    - Core compression logic
+//    - Pattern detection
+//    - Data handeling
+//    - API endpoints
+//    - Testing blocks
 
 const std = @import("std");
 

@@ -1,11 +1,11 @@
 // build.zig objectives
 //  ---------------- //
-// Build configuration
-// Dependacy management
-// Compilation settings
-// Build targets
-// Test setup
-// Web dashboards integration
+//  - Build configuration
+//  - Dependacy management
+//  - Compilation settings
+//  - Build targets
+//  - Test setup
+//  - Web dashboards integration
 
 const std = @import("std");
 
