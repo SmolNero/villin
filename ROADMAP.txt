@@ -4,14 +4,14 @@ villn/
 [] │   │   ├── ci.yml              # GitHub Actions CI pipeline
 [] │   │   └── release.yml         # Release automation
 [] │   └── ISSUE_TEMPLATE/
-[TODO:] ├── build.zig                   # Main build script
+[x]├── build.zig                   # Main build script
 [] ├── src/
-[TODO:] │   ├── main.zig               # Entry point
+[x]   ├── main.zig               # Entry point
 [] │   ├── compression/
-[] │   │   ├── villn_core.zig     # Core compression engine
-[] │   │   ├── ringbuffer.zig     # Circular buffer
-[] │   │   ├── patterns.zig       # Pattern detection
-[] │   │   └── metrics.zig        # Compression metrics
+[TODO_01] │   │   ├── villn_core.zig     # Core compression engine
+[TODO_04] │   │   ├── ringbuffer.zig     # Circular buffer
+[TODO_03] │   │   ├── patterns.zig       # Pattern detection
+[TODO_02] │   │   └── metrics.zig        # Compression metrics
 [] │   ├── plugins/
 [] │   │   ├── plugin_manager.zig # Plugin system
 [] │   │   ├── interface.zig      # Plugin interface
