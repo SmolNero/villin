@@ -1,3 +1,18 @@
+// build.zig objectives
+//  ---------------- //
+// Build configuration
+
+
+
+
+
+
+
+
+
+
+
+
 const std = @import("std");
 
 // Build function is the entry point to Zig builds system
@@ -45,3 +60,4 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_unit_tests.step);
 }
+
