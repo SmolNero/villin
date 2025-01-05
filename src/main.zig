@@ -26,10 +26,11 @@ test "basic" {
 }
 
 // TEST BLOCK 2
+// This is a placeholder for real compression tests
 test "compression placeholder" {
     std.debug.print("\nTesting compression placeholder...\n", .{});
     const result = true;       // Declares a compile-time constant, set to true
-    try std.testing.expectEqual(true, result);
+    try std.testing.expectEqual(true, result);  // compares values
     std.debug.print("compression test passed!", .{});
 }
 
