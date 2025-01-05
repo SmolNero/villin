@@ -1,3 +1,6 @@
+//main.zig objectives
+
+
 const std = @import("std");
 
 // This is Villins entry point
@@ -21,6 +24,9 @@ test "compression placeholder" {
     try std.testing.expectEqual(true, result);
     std.debug.print("compression test passed!", .{});
 }
+
+
+
 
 // test
 // └─ run test stderr  -> Shows test execution
