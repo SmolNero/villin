@@ -1,5 +1,9 @@
 
-{build.zig}
+			________________________________________________________________________________
+			
+											{build.zig}
+			________________________________________________________________________________
+			
 
 // build.zig objectives
 //  ---------------- //
@@ -58,9 +62,11 @@ pub fn build(b: *b.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_unit_tests.step);
 }
+		
+		________________________________________________________________________________
 
-
-{src/main.zig}
+									{src/main.zig}
+		________________________________________________________________________________
 
 // main.zig objectives
 //  ---------------- //
@@ -105,3 +111,6 @@ test "compression placeholder" {
 
 // Testing compression placeholder...   -> Second test starts
 // compression test passed!             -> second test ends
+
+
+________________________________________________________________________________
