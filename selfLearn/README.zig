@@ -148,7 +148,13 @@ pub const CompresEngine = struct {
 // How does our StreamHandler work?
 // consider the buffer -> temporary storage 
 //		|_
-//		   This is heavily utilized when working with streams, reading and writing smaller pieces
+//		   This is heavily utilized when working with streams, reading and writing smaller pieces - for 	
+//		   effecincy
+//		|_				
+//			Leveraging an unsigned 8-bit int NO NO NEGATIVES!)
+//
+//
+
 
 pub const StreamHandler = struct {
 	buffer: []u8,
