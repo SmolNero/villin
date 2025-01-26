@@ -113,4 +113,17 @@ test "compression placeholder" {
 // compression test passed!             -> second test ends
 
 
-________________________________________________________________________________
+		________________________________________________________________________________
+
+									{src/compression/villin_core.zig}
+		________________________________________________________________________________
+
+
+/// villin_core.zig objectives
+//	- Pattern detection
+//	- Compression logic  
+//	- Memory management
+//	- unit test
+
+cont std = @import("std");
+
