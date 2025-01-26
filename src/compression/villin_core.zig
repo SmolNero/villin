@@ -14,6 +14,10 @@ pub const CompressEngine = struct {
 		stream_buffer_size: usize = 8192, // New: Stream buffer configuration
 	}; 
 
+	
+	// New: Stream handling component
+	pub const StreamHandler = struct {}
+
 
 
 
