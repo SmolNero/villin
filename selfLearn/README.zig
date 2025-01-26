@@ -151,7 +151,7 @@ pub const CompresEngine = struct {
 //		   This is heavily utilized when working with streams, reading and writing smaller pieces - for 	
 //		   effecincy
 //		|_				
-//			Leveraging an unsigned 8-bit int NO NO NEGATIVES!)
+//			Leveraging an unsigned 8-bit int NO NO NEGATIVES!) - using only a byte of memeory. Arrays of u8 values represent that data being read from or written to a source.
 //
 //
 
