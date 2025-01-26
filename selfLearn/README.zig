@@ -135,3 +135,9 @@ test "compression placeholder" {
 
 cont std = @import("std");
 
+	// ?* -> ? = optional pointer * = denotes that this is a pointer type
+pub const CompresEngine = struct {
+	allocator: std.mem. Allocator,
+
+}
+
