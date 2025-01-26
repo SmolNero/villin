@@ -16,7 +16,11 @@ pub const CompressEngine = struct {
 
 	
 	// New: Stream handling component
-	pub const StreamHandler = struct {}
+	pub const StreamHandler = struct {
+		buffer: []u8,	// holds incoming data
+		write_pos: usize,	// Current write position
+		callback: *const fn([]const u8) error{SteamError}!void, // Output handler
+	}
 
 
 
