@@ -124,6 +124,14 @@ test "compression placeholder" {
 //	- Compression logic  
 //	- Memory management
 //	- unit test
+//	- streaming suppor: This enables VILLIN to process continuous data streams with minimal
+//	  memory overhead
+//		* StreamHandler struct: Managers buffered data processing
+//		* Streaming method
+//		* configuration
+
+
+
 
 cont std = @import("std");
 
