@@ -135,9 +135,20 @@ test "compression placeholder" {
 
 cont std = @import("std");
 
-	// ?* -> ? = optional pointer * = denotes that this is a pointer type
+
+
+
+	// ?* -> ? = optional pointer * = denotes that this is a pointer type 
 pub const CompresEngine = struct {
 	allocator: std.mem. Allocator,
 
 }
 
+
+// How does our StreamHandler work?
+
+pub const StreamHandler = struct {
+	buffer: []u8,
+	write_pos: usize,
+	callback: *const fn([]const u8) error{SteamError}!void,
+}
