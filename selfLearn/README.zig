@@ -146,6 +146,9 @@ pub const CompresEngine = struct {
 
 
 // How does our StreamHandler work?
+// consider the buffer -> temporary storage 
+//		|_
+//		   This is heavily utilized when working with streams, reading and writing smaller pieces
 
 pub const StreamHandler = struct {
 	buffer: []u8,
