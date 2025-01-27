@@ -51,6 +51,10 @@ pub const CompressEngine = struct {
 		}
 
 		// Cleanup
+		pub fn deinit(self: *StreamHandler, allocator: std.mem.Allocator) void {
+			allocator.free(self.buffer);
+			allocator.destroy(self);
+		}
 	}
 
  
