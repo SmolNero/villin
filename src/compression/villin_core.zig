@@ -73,8 +73,14 @@ pub fn init(allocator: std.mem.Allocator, config: CompressConfig) !*CompressEngi
 // New: Set up streaming modes
 pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error{StreamError}!void)!void{
     if (self.stream != null) return error.StreamAlreadyInitialized;
-    self.stream = try StreamHandler.init()
-})
+    self.stream = try StreamHandler.init(self.allocator, self.config.stream_buffer_size, callback);
+}
+
+// New: Process streaming data
+pub fn writeStream(self: *CompressEngine)
+
+
+)
 
 }
 
