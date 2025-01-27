@@ -55,9 +55,9 @@ pub const CompressEngine = struct {
 			allocator.free(self.buffer);
 			allocator.destroy(self);
 		}
-	}
+	};
 
- 
+pub fn init(allocator: std.mem.Allocator, config: ComressConfig)
 
 
 }
