@@ -88,7 +88,9 @@ pub fn writeStream(self: *CompressEngine, data:[] const u8) !void{
 } 
 
 // Core compression functionality
-pub fn compress(self: *CompressEngine, data)
+pub fn compress(self: *CompressEngine, data: []const u8) ![]u8{
+	var result = std.ArrayList(u8).init(self.allocator);
+}
 
 
 )
