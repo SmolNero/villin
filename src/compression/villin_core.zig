@@ -97,9 +97,12 @@ pub fn compress(self: *CompressEngine, data: []const u8) ![]u8{
 	while (i < data.len) {
 		if (try self.findPattern(data[i..])) |pattern| {
 			try self.encodePattern(&result, pattern);
+			i += 1 ;
 		}
 	}
+	return.toOwnedSlice(); // .toOwnedSlice()MOSTLY, a conveneince for ending up a slice with a precise length without needing to know the precise length ahead-of-time
 }
+
 
 
 )
