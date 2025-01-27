@@ -124,9 +124,9 @@ fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern
 	while (len <= max_len) : (len += 1) {
 		const pattern = data[0..len];
 		var repeats: usize = 0;
-		var pos: usize = 0;
+		var pos: usize = len;
 
-		
+
 	}
 
 )
