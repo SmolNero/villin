@@ -57,6 +57,7 @@ pub const CompressEngine = struct {
 		}
 	};
 // Initialize compression engine
+
 // !* conveys -> does not point to
 // checks whether the pointer is NULL - essentially verifies that it does not point toa valid memory location
 pub fn init(allocator: std.mem.Allocator, config: CompressConfig) !*CompressEngine{
@@ -77,7 +78,7 @@ pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error
 }
 
 // New: Process streaming data
-pub fn writeStream(self: *CompressEngine) test
+pub fn writeStream(self: *CompressEngine)
 
 
 )
