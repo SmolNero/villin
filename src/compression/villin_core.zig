@@ -77,7 +77,7 @@ pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error
 }
 
 // New: Process streaming data
-pub fn writeStream(self: *CompressEngine)test 
+pub fn writeStream(self: *CompressEngine) test
 
 
 )
