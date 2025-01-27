@@ -70,6 +70,10 @@ pub fn init(allocator: std.mem.Allocator, config: CompressConfig) !*CompressEngi
 	return engine;
 }
 
+// New: Set up streaming modes
+pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error{StreamError}!void)!void{
+    
+})
 
 }
 
