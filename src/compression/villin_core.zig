@@ -47,8 +47,10 @@ pub const CompressEngine = struct {
 		pub fn flush(self: *StreamHandler) !void {
 			if(self.write_pos == 0) return;
 			try self.callback(self.buffer[0..self.write_pos]);
-			self.write_pos = 0;
+			self.write_pos = 0; 
 		}
+
+		// Cleanup
 	}
 
  
