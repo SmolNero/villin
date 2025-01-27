@@ -78,7 +78,12 @@ pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error
 }
 
 // New: Process streaming data
-pub fn writeStream(self: *CompressEngine)
+pub fn writeStream(self: *CompressEngine, data:[] const u8) !void{
+	if (self.allocator == null) return error.StreamNotInitialized;
+
+	const compressed = try 
+} 
+
 
 
 )
