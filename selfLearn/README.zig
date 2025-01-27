@@ -152,8 +152,8 @@ pub const CompresEngine = struct {
 //		   effecincy
 //		|_				
 //			Leveraging an unsigned 8-bit int NO NO NEGATIVES!) - using only a byte of memeory. Arrays of u8 values represent that data being read from or written to a source.
-//
-//
+//			  - EFFECIENT manipulation!
+//		
 
 
 pub const StreamHandler = struct {
