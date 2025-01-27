@@ -2,7 +2,7 @@ cont std = @import("std");
 
 pub const CompressEngine = struct {
 	allocator: std.mem.Allocator,
-	config: ComressConfig,
+	config: CompressConfig,
 	metrics: ?*Metrics,
 	stream: ?*StreamHandler,  // New: Optimal streaming support
 
@@ -58,9 +58,16 @@ pub const CompressEngine = struct {
 	};
 // Initialize compression engine
 // !* conveys -> does not point to
-// checks whether the pointer is NULL
-pub fn init(allocator: std.mem.Allocator, config: ComressConfig) !*CompressEngine{
-	consts engine =  try allocator.create(CompressEngine)
+// checks whether the pointer is NULL - essentially verifies that it does not point toa valid memory location
+pub fn init(allocator: std.mem.Allocator, config: CompressConfig) !*CompressEngine{
+	consts engine =  try allocator.create(CompressEngine);
+	engine.*= .{
+		.allocator = allocator,
+		.config = config,
+		.metrics = null,
+		.stream = null,
+	};
+	return engine;
 }
 
 
