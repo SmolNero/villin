@@ -81,9 +81,13 @@ pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error
 pub fn writeStream(self: *CompressEngine, data:[] const u8) !void{
 	if (self.allocator == null) return error.StreamNotInitialized;
 
-	const compressed = try 
+	const compressed = try self.compress(data);
+	defer self.allocator.free(compressed);
+
+	try self.stream.?.write(compressed);
 } 
 
+// Core compression functionality
 
 
 )
