@@ -91,7 +91,9 @@ pub fn writeStream(self: *CompressEngine, data:[] const u8) !void{
 // Core compression functionality
 pub fn compress(self: *CompressEngine, data: []const u8) ![]u8{
 	var result = std.ArrayList(u8).init(self.allocator);
-	errdefer result.deinit();
+	errdefer result.deinit(); 
+
+	//errdefer will give you the same behavior without the redundant deinit call on success
 
 	var i: usize = 0;
 	while (i < data.len) {
@@ -100,9 +102,19 @@ pub fn compress(self: *CompressEngine, data: []const u8) ![]u8{
 			i += 1 ;
 		}
 	}
-	return.toOwnedSlice(); // .toOwnedSlice()MOSTLY, a conveneince for ending up a slice with a precise length without needing to know the precise length ahead-of-time
+	return.toOwnedSlice(); 
+
+	// .toOwnedSlice() - MOSTLY, a conveneince for ending up a slice with a precise length without needing to know the precise length ahead-of-time
 }
 
+const Pattern = struct {
+	start: usize,
+	len: usize,
+	repeats: usize,
+};
+
+fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern
+	if (data.len < self.config.min_pattern_length)
 
 
 )
