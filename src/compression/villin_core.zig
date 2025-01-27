@@ -23,7 +23,15 @@ pub const CompressEngine = struct {
 
 		// Initializing streaming
 		pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) error{StreamError}!void) !*StreamHandler {
-			const handler = try allocator.create(StreamHandler)
+			const handler = try allocator.create(StreamHandler);
+			const buf = try allocator.alloc(u8, size);
+		
+			handler.* = .{
+				.buffer = buf,
+				.write_pos = 0,
+				.callback = cb,
+			};
+
 		}
 	
 	}
