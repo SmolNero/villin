@@ -88,6 +88,7 @@ pub fn writeStream(self: *CompressEngine, data:[] const u8) !void{
 } 
 
 // Core compression functionality
+pub fn compress(self: *CompressEngine, data)
 
 
 )
