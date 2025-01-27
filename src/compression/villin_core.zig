@@ -126,8 +126,10 @@ fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern
 		var repeats: usize = 0;
 		var pos: usize = len;
 
-		while (pos + len <= date.len and std.mem.eql)
-		// std.mem.eql -> Compares two slices and returns whether they are = 
+		while (pos + len <= date.len and std.mem.eql(u8, pattern, data[pos..pos+le])){ // std.mem.eql -> Compares two slices and returns whether they are = 
+			repeats += 1;
+		} 
+		
 
 
 	}
