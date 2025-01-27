@@ -10,7 +10,7 @@ pub const CompressEngine = struct {
 	pub const CompressConfig = struct {
 		pattern_threashold: f64 = 0.95,
 		min_pattern_length: usize = 4,
-		mat_pattern_length: usize = 1024,
+		max_pattern_length: usize = 1024,
 		window_size: usize = 4096,
 		stream_buffer_size: usize = 8192, // New: Stream buffer configuration
 	}; 
@@ -114,10 +114,23 @@ const Pattern = struct {
 };
 
 fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern
-	if (data.len < self.config.min_pattern_length)
+	if (data.len < self.config.min_pattern_length) return null;
 
+	const max_len = @min=(data.len, self.config.max_pattern_length);
+	var best_pattern: ?Pattern = null;
+	var best_savings: isize = 0;
+
+	var len: usize = self.config.min_pattern_length;
+	while (len <= max_len) : (len += 1) {
+		const pattern = data[0..len];
+		var repeats: usize = 0;
+		var pos: usize = 0;
+
+		
+	}
 
 )
 
 }
+
 

@@ -136,14 +136,11 @@ test "compression placeholder" {
 cont std = @import("std");
 
 
-
-
 	// ?* -> ? = optional pointer * = denotes that this is a pointer type 
 pub const CompresEngine = struct {
 	allocator: std.mem. Allocator,
 
 }
-
 
 // How does our StreamHandler work?
 // consider the buffer -> temporary storage 
@@ -154,7 +151,6 @@ pub const CompresEngine = struct {
 //			Leveraging an unsigned 8-bit int NO NO NEGATIVES!) - using only a byte of memeory. Arrays of u8 values represent that data being read from or written to a source.
 //			  - EFFECIENT manipulation!
 //		
-
 
 pub const StreamHandler = struct {
 	buffer: []u8,
