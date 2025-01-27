@@ -42,6 +42,13 @@ pub const CompressEngine = struct {
 		@memcpy(self.buffer[self.write_pos..][0..data.len], data);
 		self.write_pos += data.len;
 	}
+
+		// Process buffer data
+		pub fn flush(self: *StreamHandler) !void {
+			if(self.write_pos == 0) return;
+			try self.callback(self.buffer[0..self.write_pos]);
+			self.write_pos = 0;
+		}
 	}
 
  
