@@ -56,8 +56,12 @@ pub const CompressEngine = struct {
 			allocator.destroy(self);
 		}
 	};
-
-pub fn init(allocator: std.mem.Allocator, config: ComressConfig)
+// Initialize compression engine
+// !* conveys -> does not point to
+// checks whether the pointer is NULL
+pub fn init(allocator: std.mem.Allocator, config: ComressConfig) !*CompressEngine{
+	consts engine =  try allocator.create(CompressEngine)
+}
 
 
 }
