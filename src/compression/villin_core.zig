@@ -154,10 +154,12 @@ pub const CompressEngine = struct {
 	}
 
 	// CLeanup
-	pub fn deinit
+	pub fn deinit(self: *CompressEngine) void {
+		if (self.stream)
+	}
 
 )
 
-} 
+
 
 
