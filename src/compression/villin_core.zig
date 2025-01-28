@@ -146,7 +146,9 @@ pub const CompressEngine = struct {
 		return best_pattern
 	}
 
-	fn encodePatter(self: *CompressEngine, result: *std.ArrayList(u8))
+	fn encodePatter(self: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
+		
+	}
 
 
 )
