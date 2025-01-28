@@ -134,12 +134,21 @@ fn findPattern( self: *CompressEngine, data: []const u8) !?Pattern {
 		if (repeats > 0){
 			const encoded_size = 2 + len;
 			const raw_size = len * repeats
-			const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size);
-				// 
- 
-	 }
-		}
+			const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size); // intCast converts an integer to another int while keeeping the same numerical 
+			// Attempting to convert a number which is out of rance of the destination type 
+			if (savings > bast_savings) {
+				best_pattern = Pattern{
+					.start = 0,
+					.len = len,
+					.repeats = repeats,
+				};
+				best_savings = savings
+			}
+	 	}
 	}
+	return best_pattern
+}
+
 
 )
 
