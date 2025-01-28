@@ -120,7 +120,7 @@ pub const CompressEngine = struct {
 		var len : usize = self.config.min_pattern_length;
 		while (len <= max_len) : (len += 1) {
 			const pattern = data[0..len];
-			var repeats: usize = 0;
+			var  : usize = 0;
 			var pos: usize = len;
 	
 			while (pos + len <= date.len and std.mem.eql(u8, pattern, data[pos..pos+le])){ // std.mem.eql -> Compares two slices and returns whether they are = 
@@ -146,10 +146,15 @@ pub const CompressEngine = struct {
 		return best_pattern
 	}
 
-	fn encodePatter(self: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
-		
+	fn encodePattern(self: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
+		try result.append(0xFF);
+		try result.append(@intCast(u8, pattern.len));
+		try result.append(@intCast(u8, pattern.repeats));
+
 	}
 
+	// CLeanup
+	pub fn deinit
 
 )
 
