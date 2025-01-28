@@ -97,7 +97,7 @@ pub fn compress(self: *CompressEngine, data: []const u8) ![]u8{
 
 	var i: usize = 0;
 	while (i < data.len) {
-		if (try self.findPattern(data[i..])) |pattern| {
+		if (try self. (data[i..])) |pattern| {
 			try self.encodePattern(&result, pattern);
 			i += 1 ;
 		}
@@ -112,15 +112,15 @@ const Pattern = struct {
 	len: usize,
 	repeats: usize,
 };
-
-fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern
+ 
+fn findPattern( self: *CompressEngine, data: []const u8) !?Pattern { 
 	if (data.len < self.config.min_pattern_length) return null;
 
 	const max_len = @min=(data.len, self.config.max_pattern_length);
 	var best_pattern: ?Pattern = null;
 	var best_savings: isize = 0;
 
-	var len: usize = self.config.min_pattern_length;
+	var len : usize = self.config.min_pattern_length;
 	while (len <= max_len) : (len += 1) {
 		const pattern = data[0..len];
 		var repeats: usize = 0;
@@ -131,14 +131,18 @@ fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern
 			pos += len;
 		} 
 
-		if
-		
-
-
+		if (repeats > 0){
+			const encoded_size = 2 + len;
+			const raw_size = len * repeats
+			const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size);
+				// 
+ 
+	 }
+		}
 	}
 
 )
 
-}
+} 
 
 
