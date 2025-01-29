@@ -2,9 +2,16 @@ const std = @import("std");
 
 // Core Engine components
 pub const CompressEngine = struct {
+
+	pub const MetricsData = struct {
+		bytes_in: usize = 0,
+		bytes_out: usize = 0,
+		patterns_found: usize = 0,
+	};
+
 	allocator: std.mem.Allocator,
 	config: CompressConfig,
-	metrics: ?*Metrics,
+	metrics: ?*MetricsData,
 	stream: ?*StreamHandler,  // New: Optimal streaming support
 
 	pub const CompressConfig = struct {
@@ -96,11 +103,11 @@ pub const CompressEngine = struct {
 		while (i < data.len) {
 			if (try self.findPattern(data[i..])) |pattern| {
 				try self.encodePattern(&result, pattern);
-				i += 1 ;
+				i += pattern.len;
 			}
 		}
 		
-		return.toOwnedSlice(); 
+		return result.toOwnedSlice(); 
 	// .toOwnedSlice() - MOSTLY, a conveneince for ending up a slice with a precise length without needing to know the precise length ahead-of-time
 	}
 
@@ -123,7 +130,7 @@ pub const CompressEngine = struct {
 			var  repeats: usize = 0;
 			var pos: usize = len;
 	
-			while (pos + len <= date.len and std.mem.eql(u8, pattern, data[pos..pos+le])){ // std.mem.eql -> Compares two slices and returns whether they are = 
+			while (pos + len <= data.len and std.mem.eql(u8, pattern, data[pos..pos+len])) { // std.mem.eql -> Compares two slices and returns whether they are = 
 				repeats += 1;
 				pos += len;
 			} 
@@ -133,7 +140,7 @@ pub const CompressEngine = struct {
 				const raw_size = len * repeats;
 				const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size); // intCast converts an integer to another int while keeeping the same numerical 
 				// Attempting to convert a number which is out of rance of the destination type 
-				if (savings > bast_savings) {
+				if (savings > best_savings) {
 					best_pattern = Pattern{
 						.start = 0,
 						.len = len,
@@ -174,7 +181,7 @@ test "Streaming compression" {
 		}
 	};
 
-	const allocator = std.testing.Allocator; // This should only be used in temp test
+	const allocator = std.testing.allocator; // This should only be used in temp test
 	var ctx = try TestContext.init(allocator);
 	defer ctx.received.deint();
 
