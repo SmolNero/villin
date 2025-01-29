@@ -210,6 +210,8 @@ pub const StreamHandler = struct {
 										// 3. Stream setup fail
 										// 4. Configuration validation could fail
 
+										// !forces us to handle potential errors, which is critical for industrial systems failure is NOT an option
+
 							//////////////// how !@This() works with core_engine////////////////
 
 
