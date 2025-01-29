@@ -3,7 +3,7 @@ const std = @import("std");
 // Core Engine components
 pub const CompressEngine = struct {
 
-	pub const MetricsData = struct {
+	pub const MetricsData = struct { // Added MetricsData def
 		bytes_in: usize = 0,
 		bytes_out: usize = 0,
 		patterns_found: usize = 0,
@@ -15,7 +15,7 @@ pub const CompressEngine = struct {
 	stream: ?*StreamHandler,  // New: Optimal streaming support
 
 	pub const CompressConfig = struct {
-		pattern_threashold: f64 = 0.95,
+		pattern_threshold: f64 = 0.95,
 		min_pattern_length: usize = 4,
 		max_pattern_length: usize = 1024,
 		window_size: usize = 4096,
