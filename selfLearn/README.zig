@@ -204,10 +204,14 @@ pub const StreamHandler = struct {
 									};
 									return engine;
 
+									// ! is important here
+										// 1. Memory allocation could fail
+										// 2. Resource initializes could fail
+										// 3. Stream setup fail
+										// 4. Configuration validation could fail
+
 							//////////////// how !@This() works with core_engine////////////////
 
-		} 
-	}
 
 
 
