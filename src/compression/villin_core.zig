@@ -155,7 +155,7 @@ pub const CompressEngine = struct {
 
 	// CLeanup
 	pub fn deinit(self: *CompressEngine) void {
-		if (self.stream)
+		if (self.stream) |stream| 
 	}
 
 )
