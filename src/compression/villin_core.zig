@@ -19,7 +19,7 @@ pub const CompressEngine = struct {
 	// New: Stream handling component
 	pub const StreamHandler = struct {
 		buffer: []u8,	// holds incoming data
-		write_pos: usize,	// Current write position
+		write_pos: usize,	// Current write position - should never be negative
 		callback: *const fn([]const u8) error{StreamError}!void, // Output handler
 
 		// Initializing streaming
@@ -37,7 +37,7 @@ pub const CompressEngine = struct {
 	
 		pub fn write(self: *StreamHandler, data: []const u8) !void{
 			if (self.write_pos + data.len > self.buffer.len) {
-				try self.flush();
+				try self.flush();	//FIXME prevent overflow  
 			}
 
 			@memcpy(self.buffer[self.write_pos..][0..data.len], data);
@@ -166,10 +166,12 @@ test "Streaming compression" {
 	const TestContext = struct {
 		received: std.ArrayList(u8),
 
-
 		pub fn init(allocator: std.mem.Allocator) !@This() {
-			return .{ .received = std.ArrayList(u8).iinit()}
+			return .{ .received = std.ArrayList(u8).init(allocator)};
 		} 
+		pub fn callback(data: []const u8) error{StreamError}!void {
+			try self.received.appendSlice(data);
+		}
 	}
 }
 
