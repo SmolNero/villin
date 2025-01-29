@@ -166,7 +166,10 @@ test "Streaming compression" {
 	const TestContext = struct {
 		received: std.ArrayList(u8),
 
-		pub fn init(allocator: std.mem.Allocator) !@This() {}
+
+		pub fn init(allocator: std.mem.Allocator) !@This() {
+
+		} 
 	}
 }
 

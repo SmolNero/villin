@@ -157,3 +157,39 @@ pub const StreamHandler = struct {
 	write_pos: usize,
 	callback: *const fn([]const u8) error{SteamError}!void,
 }
+
+
+
+
+
+
+		pub fn init(allocator: std.mem.Allocator) !@This() {
+			// @This() -> Returns the innermost struct or union that this function call is inside. THis can be usefui 
+			// for an anonymous struct that needs to refer
+			// Consider it, like saying - this exact type Im currently in
+			// Like a shortcut to refer to the current struct/type youre writing
+
+					//////////////// Consider the following example ////////////////
+
+					const Person = struct {
+						name: []const u8, 
+
+						 pub fn create() @This() {. //@This() means "person"
+						 	return .{ .name = "Smort"};
+
+						 }
+					};
+
+
+
+
+
+
+
+					//////////////// Consider the following example ////////////////
+		} 
+	}
+
+
+
+
