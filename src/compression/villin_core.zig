@@ -1,4 +1,4 @@
-cont std = @import("std");
+const std = @import("std");
 
 // Core Engine components
 pub const CompressEngine = struct {
@@ -176,7 +176,13 @@ test "Streaming compression" {
 
 	const allocator = std.testing.Allocator; // This should only be used in temp test
 	var ctx = try TestContext.init(allocator);
+	defer ctx.received.deint();
+
+	var engine = try CompressEngine.init(allocatorm, .{});
+	defer engine.deinit();
 }
+
+
 
 
 
