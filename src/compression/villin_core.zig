@@ -94,7 +94,7 @@ pub const CompressEngine = struct {
 	//errdefer will give you the same behavior without the redundant deinit call on success
 		var i: usize = 0;
 		while (i < data.len) {
-			if (try self. (data[i..])) |pattern| {
+			if (try self.findPattern(data[i..])) |pattern| {
 				try self.encodePattern(&result, pattern);
 				i += 1 ;
 			}
@@ -113,14 +113,14 @@ pub const CompressEngine = struct {
 	fn findPattern( self: *CompressEngine, data: []const u8) !?Pattern { 
 		if (data.len < self.config.min_pattern_length) return null;
 	
-		const max_len = @min=(data.len, self.config.max_pattern_length);
+		const max_len = @min(data.len, self.config.max_pattern_length);
 		var best_pattern: ?Pattern = null;
 		var best_savings: isize = 0;
 	
 		var len : usize = self.config.min_pattern_length;
 		while (len <= max_len) : (len += 1) {
 			const pattern = data[0..len];
-			var  : usize = 0;
+			var  repeats: usize = 0;
 			var pos: usize = len;
 	
 			while (pos + len <= date.len and std.mem.eql(u8, pattern, data[pos..pos+le])){ // std.mem.eql -> Compares two slices and returns whether they are = 
@@ -130,7 +130,7 @@ pub const CompressEngine = struct {
 	
 			if (repeats > 0){
 				const encoded_size = 2 + len;
-				const raw_size = len * repeats
+				const raw_size = len * repeats;
 				const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size); // intCast converts an integer to another int while keeeping the same numerical 
 				// Attempting to convert a number which is out of rance of the destination type 
 				if (savings > bast_savings) {
@@ -139,11 +139,11 @@ pub const CompressEngine = struct {
 						.len = len,
 						.repeats = repeats,
 					};
-					best_savings = savings
+					best_savings = savings;
 				}
 		 	}
 		}
-		return best_pattern
+		return best_pattern;
 	}
 
 	fn encodePattern(self: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
@@ -178,7 +178,7 @@ test "Streaming compression" {
 	var ctx = try TestContext.init(allocator);
 	defer ctx.received.deint();
 
-	var engine = try CompressEngine.init(allocatorm, .{});
+	var engine = try CompressEngine.init(allocator, .{});
 	defer engine.deinit();
 
 	try engine.initStreaming(TestContext.callback);
