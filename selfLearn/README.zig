@@ -187,8 +187,24 @@ pub const StreamHandler = struct {
 						// This means "this function might fail "- its loke sating 
 							// - if everything works - you get the result
 							// - if something goes wrong: you get an error
-							// !@This() - means
+							// !@This() - means, try ro create this type, but it might fail
 
+
+
+							//////////////// WHERE !@This() works with core_engine////////////////
+
+									// This is where it is crucial
+								pub fn init(allocator: std.mem.Allocator,.....)
+									const engine = try allocator.create(CompresEngine);
+									engine.* = . {
+										.allocator
+										.config
+										.metrics
+										.stream
+									};
+									return engine;
+
+							//////////////// how !@This() works with core_engine////////////////
 
 		} 
 	}
