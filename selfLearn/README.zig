@@ -216,5 +216,24 @@ pub const StreamHandler = struct {
 
 
 
+							////////////////Villins streaming context////////////////
 
+								pub const StreamHandler = struct {
+									buffer: []u8,
+									write_pos: usize
+								}
 
+								pub fn init(allocator: std.mem.Allocator, size: usize) !*StreamHandler{
+									//  Allocation could fail here ->!
+									const handler = try allocator.create(StreamHandler);
+									const buf = try allocator.alloc(u8, size); // Could also fail
+
+									handler.* = .{
+										.buffer = buf,
+										.write_pos = 0, 
+									};
+									return handler;
+								}
+							};
+
+							////////////////Villins streaming context////////////////
