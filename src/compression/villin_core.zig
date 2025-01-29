@@ -180,6 +180,13 @@ test "Streaming compression" {
 
 	var engine = try CompressEngine.init(allocatorm, .{});
 	defer engine.deinit();
+
+	try engine.initStreaming(TestContext.callback);
+
+	const test_data = "ABCABCABCABC";
+	try engine.writeStream(test_data);
+
+
 }
 
 
