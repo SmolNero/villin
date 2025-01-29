@@ -180,13 +180,15 @@ pub const StreamHandler = struct {
 						 }
 					};
 
-
-
-
-
-
-
 					//////////////// Consider the following example ////////////////
+
+					// The ! (error operator)
+					pub fn init(allocator: std.mem.Allocator) !@This()
+						// This means "this function might fail "- its loke sating 
+							// - if everything works - you get the result
+							// - if something goes wrong: you get an error
+
+
 		} 
 	}
 
