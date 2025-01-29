@@ -138,6 +138,8 @@ pub const CompressEngine = struct {
 			if (repeats > 0){
 				const encoded_size = 2 + len;
 				const raw_size = len * repeats;
+				const raw_size_i = @as(isize, @intCast(raw_size));				
+				const encode_size_i = @as(isize, @intCast(encoded_size));
 				const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size); // intCast converts an integer to another int while keeeping the same numerical 
 				// Attempting to convert a number which is out of rance of the destination type 
 				if (savings > best_savings) {
@@ -155,8 +157,8 @@ pub const CompressEngine = struct {
 
 	fn encodePattern(self: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
 		try result.append(0xFF);
-		try result.append(@intCast(u8, pattern.len));
-		try result.append(@intCast(u8, pattern.repeats));
+		try result.append(@as(u8, @intCast(pattern.len)));
+		try result.append(@as(u8, @intCast(pattern.repeats)));
 
 	}
 
@@ -172,30 +174,35 @@ pub const CompressEngine = struct {
 test "Streaming compression" {
 	const TestContext = struct {
 		received: std.ArrayList(u8),
+		allocator: std.mem.Allocator;
 
-		pub fn init(allocator: std.mem.Allocator) !@This() {
-			return .{ .received = std.ArrayList(u8).init(allocator)};
+		pub fn init(alloc: std.mem.Allocator) !@This() {
+			return .{ 
+				.received = std.ArrayList(u8).init(allocator)},
+				.allocator = alloc,
+			};
 		} 
-		pub fn callback(data: []const u8) error{StreamError}!void {
-			try self.received.appendSlice(data);
-		}
 	};
-
-	const allocator = std.testing.allocator; // This should only be used in temp test
+		// should only be for temporary tests
+	const allocator = std.testing.allocator; 
 	var ctx = try TestContext.init(allocator);
 	defer ctx.received.deint();
 
 	var engine = try CompressEngine.init(allocator, .{});
 	defer engine.deinit();
 
-	
-	const
+	 // Created callback
+	const cb = struct {
+		fn callback(data: []const u8) error{StreamError}!void {
+			try ctx.received.appendSlice(data);
+		}
+	}.callback;
 
-
-	try engine.initStreaming(TestContext.callback);
+	try engine.initStreaming(cb);
 
 	const test_data = "ABCABCABCABC";
 	try engine.writeStream(test_data);
+	try engine.stream.?.flush();
 
 	try std.testing.expect(ctx.received.items.len < test_data.len);
 }
