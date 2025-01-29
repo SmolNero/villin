@@ -186,7 +186,7 @@ test "Streaming compression" {
 	const test_data = "ABCABCABCABC";
 	try engine.writeStream(test_data);
 
-
+	try std.testing.expect(ctx.received.items.len < test_data.len);
 }
 
 
