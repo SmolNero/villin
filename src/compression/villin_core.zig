@@ -172,7 +172,10 @@ test "Streaming compression" {
 		pub fn callback(data: []const u8) error{StreamError}!void {
 			try self.received.appendSlice(data);
 		}
-	}
+	};
+
+	const allocator = std.testing.Allocator; // This should only be used in temp test
+	var ctx = try TestContext.init(allocator);
 }
 
 
