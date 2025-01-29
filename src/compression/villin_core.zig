@@ -54,7 +54,7 @@ pub const CompressEngine = struct {
 		// Cleanup
 		pub fn deinit(self: *StreamHandler, allocator: std.mem.Allocator) void {
 			allocator.free(self.buffer);
-			allocator.destroy(self);
+			allocator.destroy(self); // *.destroy() -> ptr should be the return valu of create, or otherwise have the same address and alignment property
 		}
 	};
 	// Initialize compression engine
@@ -156,8 +156,9 @@ pub const CompressEngine = struct {
 	// CLeanup
 	pub fn deinit(self: *CompressEngine) void {
 		if (self.stream) |stream| {
-			stream.deinit(self.allocator)
+			stream.deinit(self.allocator);
 		} 
+		self.allocator.destroy(self);
 	}
 
 )
