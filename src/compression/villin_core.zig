@@ -89,7 +89,7 @@ pub const CompressEngine = struct {
 		if (self.allocator == null) return error.StreamNotInitialized;
 
 		const compressed = try self.compress(data);
-		defer self.allocator.free(compressed);
+		defer self.stream.free(compressed);
 
 		try self.stream.?.write(compressed);
 	} 
