@@ -160,8 +160,15 @@ pub const CompressEngine = struct {
 		} 
 		self.allocator.destroy(self);
 	}
+};
 
-)
+test "Streaming compression" {
+	const TestContext = struct {
+		received: std.ArrayList(u8),
+
+		pub fn init(allocator: std.mem.Allocator) !@This() {}
+	}
+}
 
 
 
