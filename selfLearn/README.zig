@@ -187,6 +187,7 @@ pub const StreamHandler = struct {
 						// This means "this function might fail "- its loke sating 
 							// - if everything works - you get the result
 							// - if something goes wrong: you get an error
+							// !@This() - means
 
 
 		} 
