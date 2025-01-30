@@ -89,7 +89,7 @@ pub const CompressEngine = struct {
 		if (self.allocator == null) return error.StreamNotInitialized;
 
 		const compressed = try self.compress(data);
-		defer self.stream.free(compressed);
+		defer self.allocator.free(compressed);
 
 		try self.stream.?.write(compressed);
 	} 
@@ -104,6 +104,9 @@ pub const CompressEngine = struct {
 			if (try self.findPattern(data[i..])) |pattern| {
 				try self.encodePattern(&result, pattern);
 				i += pattern.len;
+			} else {
+				try result.append(data[i]);
+				i += 1;
 			}
 		}
 		
@@ -139,8 +142,8 @@ pub const CompressEngine = struct {
 				const encoded_size = 2 + len;
 				const raw_size = len * repeats;
 				const raw_size_i = @as(isize, @intCast(raw_size));				
-				const encode_size_i = @as(isize, @intCast(encoded_size));
-				const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size); // intCast converts an integer to another int while keeeping the same numerical 
+				const encoded_size_i = @as(isize, @intCast(encoded_size));
+				const savings = raw_size_i - encoded_size_i; // intCast converts an integer to another int while keeeping the same numerical 
 				// Attempting to convert a number which is out of rance of the destination type 
 				if (savings > best_savings) {
 					best_pattern = Pattern{
@@ -155,7 +158,7 @@ pub const CompressEngine = struct {
 		return best_pattern;
 	}
 
-	fn encodePattern(self: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
+	fn encodePattern(_: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
 		try result.append(0xFF);
 		try result.append(@as(u8, @intCast(pattern.len)));
 		try result.append(@as(u8, @intCast(pattern.repeats)));
@@ -174,11 +177,11 @@ pub const CompressEngine = struct {
 test "Streaming compression" {
 	const TestContext = struct {
 		received: std.ArrayList(u8),
-		allocator: std.mem.Allocator;
+		allocator: std.mem.Allocator,
 
 		pub fn init(alloc: std.mem.Allocator) !@This() {
 			return .{ 
-				.received = std.ArrayList(u8).init(allocator)},
+				.received = std.ArrayList(u8).init(alloc),
 				.allocator = alloc,
 			};
 		} 
@@ -186,19 +189,25 @@ test "Streaming compression" {
 		// should only be for temporary tests
 	const allocator = std.testing.allocator; 
 	var ctx = try TestContext.init(allocator);
-	defer ctx.received.deint();
+	defer ctx.received.deinit();
 
 	var engine = try CompressEngine.init(allocator, .{});
 	defer engine.deinit();
 
-	 // Created callback
-	const cb = struct {
-		fn callback(data: []const u8) error{StreamError}!void {
-			try ctx.received.appendSlice(data);
-		}
-	}.callback;
+	var cb_context = struct{
+		ctx: *TestContext,
+	}
 
-	try engine.initStreaming(cb);
+	 // Created callback
+	const Callback = struct {
+		ctx: *TestContext,
+
+		pub fn callback(self: *const @This(), data: []const u8) error{StreamError}!void {
+			try self.ctx.received.appendSlice(data);
+		}
+	};
+	
+	try engine.initStreaming(&Callback.callback);
 
 	const test_data = "ABCABCABCABC";
 	try engine.writeStream(test_data);
