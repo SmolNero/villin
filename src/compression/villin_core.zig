@@ -1,6 +1,12 @@
 const std = @import("std");
 
-// Core Engine components
+pub const VillnError = error{
+    StreamError,
+    OutOfMemory,
+    StreamAlreadyInitialized,
+    StreamNotInitialized,
+};
+
 pub const CompressEngine = struct {
     pub const MetricsData = struct {
         bytes_in: usize = 0,
@@ -11,17 +17,17 @@ pub const CompressEngine = struct {
     allocator: std.mem.Allocator,
     config: CompressConfig,
     metrics: ?*MetricsData,
-    stream: ?*StreamHandler, // Streaming support
+    stream: ?*StreamHandler,
+    wrapper_ctx: ?*WrapperContext = null,
 
     pub const CompressConfig = struct {
         pattern_threshold: f64 = 0.95,
         min_pattern_length: usize = 4,
         max_pattern_length: usize = 1024,
         window_size: usize = 4096,
-        stream_buffer_size: usize = 8192, // Stream buffer configuration
+        stream_buffer_size: usize = 8192,
     };
 
-    // Define StreamContext type at the module level
     pub const StreamContext = struct {
         received: std.ArrayList(u8),
         allocator: std.mem.Allocator,
@@ -32,16 +38,39 @@ pub const CompressEngine = struct {
                 .allocator = alloc,
             };
         }
+
+        pub fn deinit(self: *@This()) void {
+            self.received.deinit();
+        }
+    };
+
+    const WrapperContext = struct {
+        ctx: *StreamContext,
+        cb: *const fn(*StreamContext, []const u8) VillnError!void,
+
+        pub fn init(ctx: *StreamContext, callback: *const fn(*StreamContext, []const u8) VillnError!void) @This() {
+            return .{
+                .ctx = ctx,
+                .cb = callback,
+            };
+        }
+
+        pub fn wrap(self: *const @This(), data: []const u8) VillnError!void {
+            try self.cb(self.ctx, data);
+        }
     };
 
     pub const StreamHandler = struct {
-        buffer: []u8, 
-        write_pos: usize, 
-        callback: *const fn([]const u8) error{StreamError}!void, 
+        buffer: []u8,
+        write_pos: usize,
+        callback: *const fn([]const u8) VillnError!void,
 
-        pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) error{StreamError}!void) !*StreamHandler {
+        pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) VillnError!void) !*StreamHandler {
             const handler = try allocator.create(StreamHandler);
+            errdefer allocator.destroy(handler);
+            
             const buf = try allocator.alloc(u8, size);
+            errdefer allocator.free(buf);
 
             handler.* = .{
                 .buffer = buf,
@@ -53,7 +82,7 @@ pub const CompressEngine = struct {
 
         pub fn write(self: *StreamHandler, data: []const u8) !void {
             if (self.write_pos + data.len > self.buffer.len) {
-                try self.flush(); 
+                try self.flush();
             }
 
             @memcpy(self.buffer[self.write_pos..][0..data.len], data);
@@ -79,22 +108,41 @@ pub const CompressEngine = struct {
             .config = config,
             .metrics = null,
             .stream = null,
+            .wrapper_ctx = null,
         };
         return engine;
     }
 
-    // Updated streaming initialization
-    pub fn initStreaming(self: *CompressEngine, ctx: *StreamContext, callback: *const fn(*StreamContext, []const u8) error{StreamError}!void) !void {
+    pub fn initStreaming(self: *CompressEngine, ctx: *StreamContext, callback: *const fn(*StreamContext, []const u8) VillnError!void) !void {
         if (self.stream != null) return error.StreamAlreadyInitialized;
-
-        const cb = struct {
-            fn wrapper(data: []const u8) error{StreamError}!void {
-                try callback(ctx, data);
+    
+        const wrapper_ctx = try self.allocator.create(WrapperContext);
+        wrapper_ctx.* = WrapperContext.init(ctx, callback);
+    
+        self.wrapper_ctx = wrapper_ctx;
+        
+        const StreamCallback = struct {
+            wrapper_ctx: *const WrapperContext,
+    
+            pub fn handleData(cb: *const @This(), data: []const u8) VillnError!void {
+                try cb.wrapper_ctx.wrap(data);
             }
-        }.wrapper;
-
-        self.stream = try StreamHandler.init(self.allocator, self.config.stream_buffer_size, cb);
-    }
+        };
+    
+        const stream_callback = try self.allocator.create(StreamCallback);
+        stream_callback.* = StreamCallback{ .wrapper_ctx = wrapper_ctx };
+    
+        // ✅ Use a standalone wrapper function
+        fn callbackWrapper(data: []const u8) VillnError!void {
+            try stream_callback.handleData(stream_callback, data),
+        }
+    
+        self.stream = try StreamHandler.init(
+            self.allocator,
+            self.config.stream_buffer_size,
+            callbackWrapper, // ✅ Fixed: Correct function signature
+        );
+    };
 
     pub fn writeStream(self: *CompressEngine, data: []const u8) !void {
         if (self.stream == null) return error.StreamNotInitialized;
@@ -175,21 +223,23 @@ pub const CompressEngine = struct {
         if (self.stream) |stream| {
             stream.deinit(self.allocator);
         }
+        if (self.wrapper_ctx) |wrapper_ctx| {
+            self.allocator.destroy(wrapper_ctx);
+        }
         self.allocator.destroy(self);
     }
 };
 
-// Updated test case
 test "Streaming compression" {
     const allocator = std.testing.allocator;
     var context = try CompressEngine.StreamContext.init(allocator);
-    defer context.received.deinit();
+    defer context.deinit();
 
     var engine = try CompressEngine.init(allocator, .{});
     defer engine.deinit();
 
     const callback = struct {
-        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) error{StreamError}!void {
+        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) VillnError!void {
             try stream_ctx.received.appendSlice(data);
         }
     }.cb;
@@ -201,4 +251,33 @@ test "Streaming compression" {
     try engine.stream.?.flush();
 
     try std.testing.expect(context.received.items.len < test_data.len);
+}
+
+test "Compression patterns" {
+    const allocator = std.testing.allocator;
+    var engine = try CompressEngine.init(allocator, .{});
+    defer engine.deinit();
+
+    const test_data = "ABCABCABCABC";
+    const compressed = try engine.compress(test_data);
+    defer allocator.free(compressed);
+
+    try std.testing.expect(compressed.len < test_data.len);
+}
+
+test "Memory cleanup" {
+    const allocator = std.testing.allocator;
+    var engine = try CompressEngine.init(allocator, .{});
+    defer engine.deinit();
+
+    var context = try CompressEngine.StreamContext.init(allocator);
+    defer context.deinit();
+
+    const callback = struct {
+        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) VillnError!void {
+            try stream_ctx.received.appendSlice(data);
+        }
+    }.cb;
+
+    try engine.initStreaming(&context, callback);
 }
