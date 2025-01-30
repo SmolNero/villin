@@ -2,218 +2,202 @@ const std = @import("std");
 
 // Core Engine components
 pub const CompressEngine = struct {
+    pub const MetricsData = struct {
+        bytes_in: usize = 0,
+        bytes_out: usize = 0,
+        patterns_found: usize = 0,
+    };
 
-	pub const MetricsData = struct { // Added MetricsData def
-		bytes_in: usize = 0,
-		bytes_out: usize = 0,
-		patterns_found: usize = 0,
-	};
+    allocator: std.mem.Allocator,
+    config: CompressConfig,
+    metrics: ?*MetricsData,
+    stream: ?*StreamHandler, // Streaming support
 
-	allocator: std.mem.Allocator,
-	config: CompressConfig,
-	metrics: ?*MetricsData,
-	stream: ?*StreamHandler,  // New: Optimal streaming support
+    pub const CompressConfig = struct {
+        pattern_threshold: f64 = 0.95,
+        min_pattern_length: usize = 4,
+        max_pattern_length: usize = 1024,
+        window_size: usize = 4096,
+        stream_buffer_size: usize = 8192, // Stream buffer configuration
+    };
 
-	pub const CompressConfig = struct {
-		pattern_threshold: f64 = 0.95,
-		min_pattern_length: usize = 4,
-		max_pattern_length: usize = 1024,
-		window_size: usize = 4096,
-		stream_buffer_size: usize = 8192, // New: Stream buffer configuration
-	}; 
+    pub const StreamHandler = struct {
+        buffer: []u8, 
+        write_pos: usize, 
+        callback: *const fn([]const u8) error{StreamError}!void, 
 
-	
-	// New: Stream handling component
-	pub const StreamHandler = struct {
-		buffer: []u8,	// holds incoming data
-		write_pos: usize,	// Current write position - should never be negative
-		callback: *const fn([]const u8) error{StreamError}!void, // Output handler
+        // Initialize streaming
+        pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) error{StreamError}!void) !*StreamHandler {
+            const handler = try allocator.create(StreamHandler);
+            const buf = try allocator.alloc(u8, size);
 
-		// Initializing streaming
-		pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) error{StreamError}!void) !*StreamHandler {
-			const handler = try allocator.create(StreamHandler);
-			const buf = try allocator.alloc(u8, size);
-		
-			handler.* = .{
-				.buffer = buf,
-				.write_pos = 0,
-				.callback = cb,
-			};
-			return handler;
-		}
-	
-		pub fn write(self: *StreamHandler, data: []const u8) !void{
-			if (self.write_pos + data.len > self.buffer.len) {
-				try self.flush();	//FIXME prevent overflow  
-			}
+            handler.* = .{
+                .buffer = buf,
+                .write_pos = 0,
+                .callback = cb,
+            };
+            return handler;
+        }
 
-			@memcpy(self.buffer[self.write_pos..][0..data.len], data);
-			self.write_pos += data.len;
-		}
+        pub fn write(self: *StreamHandler, data: []const u8) !void {
+            if (self.write_pos + data.len > self.buffer.len) {
+                try self.flush(); 
+            }
 
-		// Process buffer data
-		pub fn flush(self: *StreamHandler) !void {
-			if(self.write_pos == 0) return;
-			try self.callback(self.buffer[0..self.write_pos]);
-			self.write_pos = 0; 
-		}
+            @memcpy(self.buffer[self.write_pos..][0..data.len], data);
+            self.write_pos += data.len;
+        }
 
-		// Cleanup
-		pub fn deinit(self: *StreamHandler, allocator: std.mem.Allocator) void {
-			allocator.free(self.buffer);
-			allocator.destroy(self); // *.destroy() -> ptr should be the return valu of create, or otherwise have the same address and alignment property
-		}
-	};
-	// Initialize compression engine
-	// !* conveys -> does not point to
-	// checks whether the pointer is NULL - essentially verifies that it does not point toa valid memory location
-	pub fn init(allocator: std.mem.Allocator, config: CompressConfig) !*CompressEngine{
-		const engine =  try allocator.create(CompressEngine);
-		engine.*= .{
-			.allocator = allocator,
-			.config = config,
-			.metrics = null,
-			.stream = null,
-		};
-		return engine;
-	}
+        pub fn flush(self: *StreamHandler) !void {
+            if (self.write_pos == 0) return;
+            try self.callback(self.buffer[0..self.write_pos]);
+            self.write_pos = 0;
+        }
 
-	// New: Set up streaming modes
-	pub fn initStreaming(self: *CompressEngine, callback: *const fn([]const u8)error{StreamError}!void)!void{
-    	if (self.stream != null) return error.StreamAlreadyInitialized;
-    	self.stream = try StreamHandler.init(self.allocator, self.config.stream_buffer_size, callback);
-	}
+        pub fn deinit(self: *StreamHandler, allocator: std.mem.Allocator) void {
+            allocator.free(self.buffer);
+            allocator.destroy(self);
+        }
+    };
 
-	// New: Process streaming data
-	pub fn writeStream(self: *CompressEngine, data:[] const u8) !void{
-		if (self.allocator == null) return error.StreamNotInitialized;
+    pub fn init(allocator: std.mem.Allocator, config: CompressConfig) !*CompressEngine {
+        const engine = try allocator.create(CompressEngine);
+        engine.* = .{
+            .allocator = allocator,
+            .config = config,
+            .metrics = null,
+            .stream = null,
+        };
+        return engine;
+    }
 
-		const compressed = try self.compress(data);
-		defer self.allocator.free(compressed);
+    // Streaming initialization with wrapper function
+    pub fn initStreaming(self: *CompressEngine, ctx: *TestContext, callback: *const fn (*TestContext, []const u8) error{StreamError}!void) !void {
+        if (self.stream != null) return error.StreamAlreadyInitialized;
 
-		try self.stream.?.write(compressed);
-	} 
+		self.stream = try StreamHandler.init(self.allocator, self.config.stream_buffer_size, struct {
+		    pub fn streamCallback(data: []const u8) error{StreamError}!void {
+		        try callback(ctx, data);
+		    }
+		}.streamCallback);
+    }
 
-	// Core compression functionality
-	pub fn compress(self: *CompressEngine, data: []const u8) ![]u8{
-		var result = std.ArrayList(u8).init(self.allocator);
-		errdefer result.deinit(); 
-	//errdefer will give you the same behavior without the redundant deinit call on success
-		var i: usize = 0;
-		while (i < data.len) {
-			if (try self.findPattern(data[i..])) |pattern| {
-				try self.encodePattern(&result, pattern);
-				i += pattern.len;
-			} else {
-				try result.append(data[i]);
-				i += 1;
-			}
-		}
-		
-		return result.toOwnedSlice(); 
-	// .toOwnedSlice() - MOSTLY, a conveneince for ending up a slice with a precise length without needing to know the precise length ahead-of-time
-	}
+    pub fn writeStream(self: *CompressEngine, data: []const u8) !void {
+        if (self.stream == null) return error.StreamNotInitialized;
 
-	const Pattern = struct {
-		start: usize,
-		len: usize,
-		repeats: usize,
-	};
- 
-	fn findPattern( self: *CompressEngine, data: []const u8) !?Pattern { 
-		if (data.len < self.config.min_pattern_length) return null;
-	
-		const max_len = @min(data.len, self.config.max_pattern_length);
-		var best_pattern: ?Pattern = null;
-		var best_savings: isize = 0;
-	
-		var len : usize = self.config.min_pattern_length;
-		while (len <= max_len) : (len += 1) {
-			const pattern = data[0..len];
-			var  repeats: usize = 0;
-			var pos: usize = len;
-	
-			while (pos + len <= data.len and std.mem.eql(u8, pattern, data[pos..pos+len])) { // std.mem.eql -> Compares two slices and returns whether they are = 
-				repeats += 1;
-				pos += len;
-			} 
-	
-			if (repeats > 0){
-				const encoded_size = 2 + len;
-				const raw_size = len * repeats;
-				const raw_size_i = @as(isize, @intCast(raw_size));				
-				const encoded_size_i = @as(isize, @intCast(encoded_size));
-				const savings = raw_size_i - encoded_size_i; // intCast converts an integer to another int while keeeping the same numerical 
-				// Attempting to convert a number which is out of rance of the destination type 
-				if (savings > best_savings) {
-					best_pattern = Pattern{
-						.start = 0,
-						.len = len,
-						.repeats = repeats,
-					};
-					best_savings = savings;
-				}
-		 	}
-		}
-		return best_pattern;
-	}
+        const compressed = try self.compress(data);
+        defer self.allocator.free(compressed);
 
-	fn encodePattern(_: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
-		try result.append(0xFF);
-		try result.append(@as(u8, @intCast(pattern.len)));
-		try result.append(@as(u8, @intCast(pattern.repeats)));
+        try self.stream.?.write(compressed);
+    }
 
-	}
+    pub fn compress(self: *CompressEngine, data: []const u8) ![]u8 {
+        var result = std.ArrayList(u8).init(self.allocator);
+        errdefer result.deinit();
 
-	// CLeanup
-	pub fn deinit(self: *CompressEngine) void {
-		if (self.stream) |stream| {
-			stream.deinit(self.allocator);
-		} 
-		self.allocator.destroy(self);
-	}
+        var i: usize = 0;
+        while (i < data.len) {
+            if (try self.findPattern(data[i..])) |pattern| {
+                try self.encodePattern(&result, pattern);
+                i += pattern.len;
+            } else {
+                try result.append(data[i]);
+                i += 1;
+            }
+        }
+
+        return result.toOwnedSlice();
+    }
+
+    const Pattern = struct {
+        start: usize,
+        len: usize,
+        repeats: usize,
+    };
+
+    fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern {
+        if (data.len < self.config.min_pattern_length) return null;
+
+        const max_len = @min(data.len, self.config.max_pattern_length);
+        var best_pattern: ?Pattern = null;
+        var best_savings: isize = 0;
+
+        var len: usize = self.config.min_pattern_length;
+        while (len <= max_len) : (len += 1) {
+            const pattern = data[0..len];
+            var repeats: usize = 0;
+            var pos: usize = len;
+
+            while (pos + len <= data.len and std.mem.eql(u8, pattern, data[pos..pos+len])) {
+                repeats += 1;
+                pos += len;
+            }
+
+            if (repeats > 0) {
+                const encoded_size = 2 + len;
+                const raw_size = len * repeats;
+                const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size);
+
+                if (savings > best_savings) {
+                    best_pattern = Pattern{
+                        .start = 0,
+                        .len = len,
+                        .repeats = repeats,
+                    };
+                    best_savings = savings;
+                }
+            }
+        }
+        return best_pattern;
+    }
+
+    fn encodePattern(_: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
+        try result.append(0xFF);
+        try result.append(@intCast(u8, pattern.len));
+        try result.append(@intCast(u8, pattern.repeats));
+    }
+
+    pub fn deinit(self: *CompressEngine) void {
+        if (self.stream) |stream| {
+            stream.deinit(self.allocator);
+        }
+        self.allocator.destroy(self);
+    }
 };
-	// Test streaming functionality
+
+// Test streaming functionality
 test "Streaming compression" {
-	const TestContext = struct {
-		received: std.ArrayList(u8),
-		allocator: std.mem.Allocator,
+    const TestContext = struct {
+        received: std.ArrayList(u8),
+        allocator: std.mem.Allocator,
 
-		pub fn init(alloc: std.mem.Allocator) !@This() {
-			return .{ 
-				.received = std.ArrayList(u8).init(alloc),
-				.allocator = alloc,
-			};
-		} 
-	};
-		// should only be for temporary tests
-	const allocator = std.testing.allocator; 
-	var ctx = try TestContext.init(allocator);
-	defer ctx.received.deinit();
+        pub fn init(alloc: std.mem.Allocator) !@This() {
+            return .{
+                .received = std.ArrayList(u8).init(alloc),
+                .allocator = alloc,
+            };
+        }
+    };
 
-	var engine = try CompressEngine.init(allocator, .{});
-	defer engine.deinit();
+    const allocator = std.testing.allocator;
+    var ctx = try TestContext.init(allocator);
+    defer ctx.received.deinit();
 
-	const CallbackContext = struct{
-		ctx: *TestContext,
+    var engine = try CompressEngine.init(allocator, .{});
+    defer engine.deinit();
 
-		pub fn callback(user_ctx: *const @This(), data: []const u8) error{StreamError}!void {
-			try user_ctx.ctx.received.appendSlice(data);
-		}
-	};
-	
-	const callback_ctx = CallbackContext{ .ctx = &ctx};
-	try engine.initStreaming(callback_ctx.callback);
+    fn callback(ctx: *TestContext, data: []const u8) error{StreamError}!void {
+        ctx.received.appendSlice(data) catch |err| switch (err) {
+            error.OutOfMemory => return error.StreamError,
+            else => return err, // Forward unexpected errors
+        };
+    }
 
-	const test_data = "ABCABCABCABC";
-	try engine.writeStream(test_data);
-	try engine.stream.?.flush();
+    try engine.initStreaming(&ctx, callback);
 
-	try std.testing.expect(ctx.received.items.len < test_data.len);
+    const test_data = "ABCABCABCABC";
+    try engine.writeStream(test_data);
+    try engine.stream.?.flush();
+
+    try std.testing.expect(ctx.received.items.len < test_data.len);
 }
-
-
-
-
-
-
