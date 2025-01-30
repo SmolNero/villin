@@ -194,20 +194,16 @@ test "Streaming compression" {
 	var engine = try CompressEngine.init(allocator, .{});
 	defer engine.deinit();
 
-	var cb_context = struct{
-		ctx: *TestContext,
-	}
-
-	 // Created callback
-	const Callback = struct {
+	const CallbackContext = struct{
 		ctx: *TestContext,
 
-		pub fn callback(self: *const @This(), data: []const u8) error{StreamError}!void {
-			try self.ctx.received.appendSlice(data);
+		pub fn callback(user_ctx: *const @This(), data: []const u8) error{StreamError}!void {
+			try user_ctx.ctx.received.appendSlice(data);
 		}
 	};
 	
-	try engine.initStreaming(&Callback.callback);
+	const callback_ctx = CallbackContext{ .ctx = &ctx};
+	try engine.initStreaming(callback_ctx.callback);
 
 	const test_data = "ABCABCABCABC";
 	try engine.writeStream(test_data);
