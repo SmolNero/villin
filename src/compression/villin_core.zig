@@ -26,6 +26,7 @@ pub const CompressEngine = struct {
         write_pos: usize, 
         callback: *const fn([]const u8) error{StreamError}!void, 
 
+        // Initialize streaming
         pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) error{StreamError}!void) !*StreamHandler {
             const handler = try allocator.create(StreamHandler);
             const buf = try allocator.alloc(u8, size);
@@ -74,11 +75,11 @@ pub const CompressEngine = struct {
     pub fn initStreaming(self: *CompressEngine, ctx: *TestContext, callback: *const fn (*TestContext, []const u8) error{StreamError}!void) !void {
         if (self.stream != null) return error.StreamAlreadyInitialized;
 
-        fn wrapper(data: []const u8) error{StreamError}!void {
-            try callback(ctx, data),
-        };
-
-        self.stream = try StreamHandler.init(self.allocator, self.config.stream_buffer_size, wrapper);
+		self.stream = try StreamHandler.init(self.allocator, self.config.stream_buffer_size, struct {
+		    pub fn streamCallback(data: []const u8) error{StreamError}!void {
+		        try callback(ctx, data);
+		    }
+		}.streamCallback);
     }
 
     pub fn writeStream(self: *CompressEngine, data: []const u8) !void {
@@ -113,6 +114,42 @@ pub const CompressEngine = struct {
         len: usize,
         repeats: usize,
     };
+
+    fn findPattern(self: *CompressEngine, data: []const u8) !?Pattern {
+        if (data.len < self.config.min_pattern_length) return null;
+
+        const max_len = @min(data.len, self.config.max_pattern_length);
+        var best_pattern: ?Pattern = null;
+        var best_savings: isize = 0;
+
+        var len: usize = self.config.min_pattern_length;
+        while (len <= max_len) : (len += 1) {
+            const pattern = data[0..len];
+            var repeats: usize = 0;
+            var pos: usize = len;
+
+            while (pos + len <= data.len and std.mem.eql(u8, pattern, data[pos..pos+len])) {
+                repeats += 1;
+                pos += len;
+            }
+
+            if (repeats > 0) {
+                const encoded_size = 2 + len;
+                const raw_size = len * repeats;
+                const savings = @intCast(isize, raw_size) - @intCast(isize, encoded_size);
+
+                if (savings > best_savings) {
+                    best_pattern = Pattern{
+                        .start = 0,
+                        .len = len,
+                        .repeats = repeats,
+                    };
+                    best_savings = savings;
+                }
+            }
+        }
+        return best_pattern;
+    }
 
     fn encodePattern(_: *CompressEngine, result: *std.ArrayList(u8), pattern: Pattern) !void {
         try result.append(0xFF);
@@ -154,7 +191,7 @@ test "Streaming compression" {
             error.OutOfMemory => return error.StreamError,
             else => return err, // Forward unexpected errors
         };
-    } // ✅ Added missing semicolon
+    },
 
     try engine.initStreaming(&ctx, callback);
 
