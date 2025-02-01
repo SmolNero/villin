@@ -1,6 +1,6 @@
 // src/compression/tests/villn_core_test.zig
 const std = @import("std");
-const villn = @import("../villn_core.zig");
+const villn = @import("../villin_core.zig");
 
 const testing = std.testing;
 const CompressEngine = villn.CompressEngine;
