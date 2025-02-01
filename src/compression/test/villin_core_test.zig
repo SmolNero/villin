@@ -1,9 +1,9 @@
-// src/compression/tests/villn_core_test.zig
+// src/compression/test/villin_core_test.zig
 const std = @import("std");
-const villn = @import("../villin_core.zig");
+const villin = @import("villin");  // Now importing the module
 
 const testing = std.testing;
-const CompressEngine = villn.CompressEngine;
+const CompressEngine = villin.CompressEngine;
 
 test "Streaming compression" {
     const allocator = testing.allocator;
@@ -18,7 +18,7 @@ test "Streaming compression" {
 
     // Setup callback
     const callback = struct {
-        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) villn.VillnError!void {
+        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) villin.villinError!void {
             try stream_ctx.received.appendSlice(data);
         }
     }.cb;
@@ -62,7 +62,7 @@ test "Memory cleanup" {
 
     // Setup and test callback
     const callback = struct {
-        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) villn.VillnError!void {
+        fn cb(stream_ctx: *CompressEngine.StreamContext, data: []const u8) villin.villinError!void {
             try stream_ctx.received.appendSlice(data);
         }
     }.cb;
