@@ -1,7 +1,7 @@
-// src/compression/villn_core.zig
+// src/compression/villin_core.zig
 const std = @import("std");
 
-pub const VillnError = error{
+pub const villinError = error{
     StreamError,
     OutOfMemory,
     StreamAlreadyInitialized,
@@ -47,16 +47,16 @@ pub const CompressEngine = struct {
 
     const WrapperContext = struct {
         ctx: *StreamContext,
-        cb: *const fn(*StreamContext, []const u8) VillnError!void,
+        cb: *const fn(*StreamContext, []const u8) villinError!void,
 
-        pub fn init(ctx: *StreamContext, callback: *const fn(*StreamContext, []const u8) VillnError!void) @This() {
+        pub fn init(ctx: *StreamContext, callback: *const fn(*StreamContext, []const u8) villinError!void) @This() {
             return .{
                 .ctx = ctx,
                 .cb = callback,
             };
         }
 
-        pub fn wrap(self: *const @This(), data: []const u8) VillnError!void {
+        pub fn wrap(self: *const @This(), data: []const u8) villinError!void {
             try self.cb(self.ctx, data);
         }
     };
@@ -64,9 +64,9 @@ pub const CompressEngine = struct {
     pub const StreamHandler = struct {
         buffer: []u8,
         write_pos: usize,
-        callback: *const fn([]const u8) VillnError!void,
+        callback: *const fn([]const u8) villinError!void,
 
-        pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) VillnError!void) !*StreamHandler {
+        pub fn init(allocator: std.mem.Allocator, size: usize, cb: *const fn([]const u8) villinError!void) !*StreamHandler {
             const handler = try allocator.create(StreamHandler);
             errdefer allocator.destroy(handler);
             
