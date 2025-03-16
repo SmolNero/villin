@@ -2,6 +2,14 @@
 
 ![villin Logo](assets/logo.png)
 
+
+
+🚧 Work in Progress 🚧
+
+**This project is in an early stage of development and is not ready for production use. Breaking changes are likely, and documentation may be incomplete. Use at your own risk! Contributions and feedback are welcome.**
+
+![Project Status](https://img.shields.io/badge/status-work--in--progress-yellow)
+
 > We make industrial sensor data small through zero-cost pattern recognition. While others treat sensor data like any other file, we see the hidden rhythms of machines - the predictable heartbeats of industrial systems. Our compression engine, built with zero-cost abstractions, turns these patterns into dramatic storage savings, helping factories cut costs without losing vital information. Already processing terabytes daily across manufacturing floors, we're not just moving data - we're decoding the language of industry at bare-metal speeds.
 
 ## Bending Industrial Energies
@@ -25,18 +33,19 @@ pub fn EnergyBender(comptime SensorType: type) type {
 ### What We Mean by "Bending":
 
 1. **Pattern Recognition**
+
    - Detect natural rhythms in sensor data
    - Identify cyclic industrial patterns
    - Compress predictable sequences
    - Preserve anomalies and important variations
-
 2. **Energy Transformation**
+
    - Convert raw sensor streams into efficient patterns
    - Maintain data integrity while reducing size
    - Transform chaotic data into ordered streams
    - Preserve the essence of industrial processes
-
 3. **Zero-Cost Philosophy**
+
    - No runtime overhead for pattern detection
    - Direct memory mapping for efficiency
    - Compile-time optimization of known patterns
@@ -47,6 +56,7 @@ pub fn EnergyBender(comptime SensorType: type) type {
 ## How VILLN Bends Data
 
 ### Pattern Recognition
+
 ```zig
 pub fn IndustrialPatternBender(comptime Config: type) type {
     return struct {
@@ -54,11 +64,11 @@ pub fn IndustrialPatternBender(comptime Config: type) type {
         pub fn bendPattern(raw_data: []const u8) !BentPattern {
             // Identify natural frequencies
             var pattern = try self.detectNaturalFrequency(raw_data);
-            
+          
             // Compress cyclic patterns
             return self.compressPattern(pattern);
         }
-        
+      
         // Zero-cost pattern detection
         fn detectNaturalFrequency(data: []const u8) !Pattern {
             // Advanced pattern detection at compile-time

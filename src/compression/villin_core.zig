@@ -136,16 +136,24 @@ pub const CompressEngine = struct {
             }
         };
 
-        const stream_callback = StreamCallback{ .wrapper_ctx = wrapper_ctx };
+        const stream_callback = try self.allocator.create(StreamCallback);
+        stream_callback.* = StreamCallback{ .wrapper_ctx = wrapper_ctx };
         
-        fn wrapCallback(data: []const u8) VillnError!void {
-            try stream_callback.handleData(&stream_callback, data);
-        }
+        // Fixed callback syntax
+        const CallbackWrapper = struct {
+            callback: *const StreamCallback,
+            
+            pub fn cb(data: []const u8) VillnError!void {
+                try callback.handleData(callback, data);
+            }
+        };
+        
+        const wrapper = CallbackWrapper{ .callback = stream_callback };
 
         self.stream = try StreamHandler.init(
             self.allocator,
             self.config.stream_buffer_size,
-            wrapCallback,
+            wrapper.cb
         );
     }
 
